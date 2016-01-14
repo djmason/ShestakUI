@@ -316,12 +316,15 @@ function Filger:OnEvent(event, unit)
 					found = true
 				end
 			elseif data.filter == "CD" and (not data.spec or data.spec == ptt) then
+				local charges, maxCharges, chargeStart, chargeDuration
 				if data.spellID then
 					name, _, icon = GetSpellInfo(data.spellID)
 					if data.absID then
 						start, duration = GetSpellCooldown(data.spellID)
+						charges, maxCharges, chargeStart, chargeDuration = GetSpellCharges(data.spellID)
 					else
 						start, duration = GetSpellCooldown(name)
+						charges, maxCharges, chargeStart, chargeDuration = GetSpellCharges(name)
 					end
 					spid = data.spellID
 				elseif data.slotID then
@@ -332,7 +335,11 @@ function Filger:OnEvent(event, unit)
 						start, duration = GetInventoryItemCooldown("player", data.slotID)
 					end
 				end
-				if name and (duration or 0) > 1.5 then
+				if name and charges and maxCharges and chargeStart and chargeDuration and charges < maxCharges then
+					count = maxCharges - charges
+					start, duration = chargeStart, chargeDuration
+					found = true
+				elseif name and (duration or 0) > 1.5 then
 					found = true
 				end
 			elseif data.filter == "ICD" and (not data.spec or data.spec == ptt) then
